@@ -1,3 +1,14 @@
+"""
+This script is a simple example of how to use the OpenAI API to generate new
+code.
+
+The script takes a single instruction as input, and then uses the OpenAI API
+to generate a new script based on the instruction.
+
+The script then shows the diff between the old script and the new script, and
+asks the user if they want to commit the new script to git.
+"""
+
 import os
 import openai
 import re
@@ -8,17 +19,6 @@ import difflib
 from pygments import highlight
 from pygments.lexers import PythonLexer, DiffLexer
 from pygments.formatters import TerminalFormatter
-
-def run_script(script_name):
-    # Ask the user if they want to run the new script.
-    run_script = input("Run script? [y/n] ")
-
-    if run_script == "y":
-        # Run the new script.
-        subprocess.run(["python", script_name])
-    else:
-        # Output the commands to run the new script.
-        print(f"\nRun the new script with:\n\npython {script_name}")
 
 script_name = os.path.basename(__file__)
 
@@ -67,4 +67,12 @@ if commit_to_git == "y":
     commit_message = textwrap.fill(f"Generated {new_script_name}\n\n{instruction}", 72)
     subprocess.run(["git", "commit", "-m", commit_message])
 
-    run_script(new_script_name)
+    # Ask the user if they want to run the new script.
+    run_script = input("Run script? [y/n] ")
+
+    if run_script == "y":
+        # Run the new script.
+        subprocess.run(["python", new_script_name])
+    else:
+        # Output the commands to run the new script.
+        print(f"\nRun the new script with:\n\npython {new_script_name}")
