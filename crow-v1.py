@@ -1,78 +1,91 @@
 """
-1. Read input from the user
-2. Send a copy of the currently running script concatenated with the user's instruction to the openai completion api. Use the code-davinci-002 model and assume that the API key is available in the OPENAI_API_KEY environment variable.
-3. The returned result should contain a new python script
+This is a small script called crow that writes code that generates new versions of itself.
+
+1. Read an instruction from the user via the console input.
+2. Make a prompt that is the instruction followed by the contents of the currently running script.
+2. Send the prompt to the openai completion api. Use the code-davinci-002 model.
+3. The returned result will contain a new python script.
 4. Increment a version number that indicates which version of the script to write.
 5. Write the new script to a new file that has the same name as the existing script, but with the new version appended. For example, if this script is called crow-v1.py then the next script will be called crow-v2.py
 6. Output the name of the new script and suggest that the user run it with python `name of script`
+
+The OpenAI API for completions is available using the openai pypi library here is an example of the code to call it:
+
+import openai
+openai.Completion.create(model="code-davinci-002", prompt="Say this is a test")`
 """
 
-import os
+import openai
 import sys
-import requests
-import json
+import os
 
-def get_script_name():
+def get_next_version(filename):
     """
-    Returns the name of the currently running script
+    Given a filename, return the next version number.
     """
-    return os.path.basename(sys.argv[0])
+    # Get the current version number
+    version = int(filename.split("-v")[1].split(".py")[0])
+    # Increment the version number
+    version += 1
+    # Return the new version number
+    return version
 
-def get_script_version():
+def get_new_filename(filename):
     """
-    Returns the version number of the currently running script
+    Given a filename, return the next version of the filename.
     """
-    return int(get_script_name().split('-')[1].split('.')[0].replace('v', ''))
+    # Get the current version number
+    version = get_next_version(filename)
+    # Return the new filename
+    return filename.split("-v")[0] + "-v" + str(version) + ".py"
 
-def get_script_text():
+def get_prompt(filename, instruction):
     """
-    Returns the text of the currently running script
+    Given a filename and an instruction, return the prompt to send to the openai api.
     """
-    with open(get_script_name(), 'r') as f:
-        return f.read()
+    # Read the contents of the file
+    with open(filename, "r") as f:
+        contents = f.read()
+    # Return the prompt
+    return instruction + "\n" + contents
 
-def get_next_script_name():
+def get_completion(prompt):
     """
-    Returns the name of the next script
+    Given a prompt, return the completion from the openai api.
     """
-    return get_script_name().replace(f'v{get_script_version()}', f'v{get_script_version() + 1}')
+    # Call the openai api
+    completion = openai.Completion.create(model="code-davinci-002", prompt=prompt)
+    # Return the completion
+    return completion
 
-def get_next_script_text(user_input):
+def write_completion(filename, completion):
     """
-    Returns the text of the next script
+    Given a filename and a completion, write the completion to the filename.
     """
-    api_key = os.environ['OPENAI_API_KEY']
-    url = 'https://api.openai.com/v1/engines/davinci/completions'
-    headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {api_key}'}
-    data = {
-        'prompt': get_script_text() + '\n' + user_input,
-        'max_tokens': 100,
-        'temperature': 0.7,
-        'top_p': 0.9,
-        'n': 1,
-        'stream': False,
-        'logprobs': None,
-        'stop': '\n',
-    }
-    response = requests.post(url, headers=headers, data=json.dumps(data))
-    return response.json()['choices'][0]['text']
-
-def write_next_script(text):
-    """
-    Writes the next script to a file
-    """
-    with open(get_next_script_name(), 'w') as f:
-        f.write(text)
+    # Write the completion to the filename
+    with open(filename, "w") as f:
+        f.write(completion)
 
 def main():
     """
-    The main function
+    This is the main function.
     """
-    user_input = input('What should I do next? ')
-    next_script_text = get_next_script_text(user_input)
-    write_next_script(next_script_text)
-    print(f'I wrote a new script called {get_next_script_name()}')
-    print(f'You can run it with python {get_next_script_name()}')
+    # Get the filename of this script
+    filename = sys.argv[0]
+    # Get the instruction from the user
+    instruction = input("Enter an instruction: ")
+    # Get the prompt
+    prompt = get_prompt(filename, instruction)
+    # Get the completion
+    completion = get_completion(prompt)
+    # Get the new filename
+    new_filename = get_new_filename(filename)
+    # Write the completion to the new filename
+    write_completion(new_filename, completion)
+    # Print the new filename
+    print("Wrote new script to " + new_filename)
+    # Print the command to run the new script
+    print("Run it with python " + new_filename)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
