@@ -1,52 +1,78 @@
 """
 1. Read input from the user
-2. Send a copy of the currently running script concatenated with the user's instruction to the openai completion api. The returned result will contain a new python script
+2. Send a copy of the currently running script concatenated with the user's instruction to the openai completion api. Use the code-davinci-002 model and assume that the API key is available in the OPENAI_API_KEY environment variable.
+3. The returned result should contain a new python script
 4. Increment a version number that indicates which version of the script to write.
 5. Write the new script to a new file that has the same name as the existing script, but with the new version appended. For example, if this script is called crow-v1.py then the next script will be called crow-v2.py
 6. Output the name of the new script and suggest that the user run it with python `name of script`
 """
 
-import requests
-import sys
 import os
+import sys
+import requests
+import json
 
-# Get the name of the currently running script
-script_name = sys.argv[0]
+def get_script_name():
+    """
+    Returns the name of the currently running script
+    """
+    return os.path.basename(sys.argv[0])
 
-# Get the user's input
-user_input = sys.argv[1]
+def get_script_version():
+    """
+    Returns the version number of the currently running script
+    """
+    return int(get_script_name().split('-')[1].split('.')[0].replace('v', ''))
 
-# Get the current version of the script
-version = script_name.split('-')[1].split('.')[0].split('v')[1]
+def get_script_text():
+    """
+    Returns the text of the currently running script
+    """
+    with open(get_script_name(), 'r') as f:
+        return f.read()
 
-# Get the name of the script without the version number
-script_name_no_version = script_name.split('-')[0]
+def get_next_script_name():
+    """
+    Returns the name of the next script
+    """
+    return get_script_name().replace(f'v{get_script_version()}', f'v{get_script_version() + 1}')
 
-# Get the name of the next version of the script
-next_version = str(int(version) + 1)
+def get_next_script_text(user_input):
+    """
+    Returns the text of the next script
+    """
+    api_key = os.environ['OPENAI_API_KEY']
+    url = 'https://api.openai.com/v1/engines/davinci/completions'
+    headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {api_key}'}
+    data = {
+        'prompt': get_script_text() + '\n' + user_input,
+        'max_tokens': 100,
+        'temperature': 0.7,
+        'top_p': 0.9,
+        'n': 1,
+        'stream': False,
+        'logprobs': None,
+        'stop': '\n',
+    }
+    response = requests.post(url, headers=headers, data=json.dumps(data))
+    return response.json()['choices'][0]['text']
 
-# Get the name of the next version of the script
-next_script_name = script_name_no_version + '-v' + next_version + '.py'
+def write_next_script(text):
+    """
+    Writes the next script to a file
+    """
+    with open(get_next_script_name(), 'w') as f:
+        f.write(text)
 
-# Get the contents of the currently running script
-with open(script_name, 'r') as f:
-    script_contents = f.read()
+def main():
+    """
+    The main function
+    """
+    user_input = input('What should I do next? ')
+    next_script_text = get_next_script_text(user_input)
+    write_next_script(next_script_text)
+    print(f'I wrote a new script called {get_next_script_name()}')
+    print(f'You can run it with python {get_next_script_name()}')
 
-# Concatenate the script contents with the user's input
-input_text = script_contents + '\n' + user_input
-
-# Send the input text to the openai completion api
-response = requests.post('https://api.openai.com/v1/engines/davinci/completions',
-                         json={'prompt': input_text, 'max_tokens': 100, 'temperature': 0.7, 'top_p': 0.9},
-                         headers={'Authorization': 'Bearer ' + os.environ['OPENAI_KEY']})
-
-# Get the response text
-response_text = response.json()['choices'][0]['text']
-
-# Write the response text to a new file
-with open(next_script_name, 'w') as f:
-    f.write(response_text)
-
-# Output the name of the new script and suggest that the user run it with python `name of script`
-print('Wrote new script to ' + next_script_name)
-print('Run it with python ' + next_script_name)
+if __name__ == '__main__':
+    main()
