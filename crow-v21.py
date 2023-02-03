@@ -33,7 +33,8 @@ response = openai.Edit.create(
         model="code-davinci-edit-001",
         input=script_code,
         instruction=instruction,
-        temperature=0.7)
+        temperature=0,
+        top_p=0.9)
 new_script_code = response["choices"][0]["text"]
 
 script_version = int(re.search(r"-v(\d+)\.py", script_name).group(1))
