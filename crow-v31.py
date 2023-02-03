@@ -42,12 +42,15 @@ def add_and_commit_script(script_name, instruction):
     subprocess.run(["git", "commit", "-m", commit_title, "-m", commit_message])
 
 def run_script(script_name):
-    # Run the new script.
-    subprocess.run(["python", script_name])
+    # Ask the user if they want to run the new script.
+    run_script = input(f"Run {script_name}? [y/n] ")
 
-def output_run_script_commands(script_name):
-    # Output the commands to run the new script.
-    print(f"\nRun the new script with:\n\npython {script_name}")
+    if run_script == "y":
+        # Run the new script.
+        subprocess.run(["python", script_name])
+    else:
+        # Output the commands to run the new script.
+        print(f"\nRun the new script with:\n\npython {script_name}")
 
 script_name = os.path.basename(__file__)
 
@@ -65,15 +68,15 @@ new_script_name = re.sub(r"-v(\d+)\.py", lambda m: f"-v{int(m.group(1)) + 1}.py"
 with open(new_script_name, "w") as f:
     f.write(new_script_code)
 
+# Output information on how to run the new script.
+print(f"\nNew script created: {new_script_name}")
+
 # Show the diff between the old script and the new script.
 with open(script_name) as f:
     old_script_code = f.readlines()
 
 with open(new_script_name) as f:
     new_script_code = f.readlines()
-
-# Output information on how to run the new script.
-print(f"\nNew script created: {new_script_name}")
 
 print(get_diff(old_script_code, new_script_code, script_name, new_script_name))
 
@@ -86,12 +89,4 @@ commit_to_git = input("Commit to git? [y/n] ")
 if commit_to_git == "y":
     add_and_commit_script(new_script_name, instruction)
 
-    # Ask the user if they want to run the new script.
-    run_script = input("Run script? [y/n] ")
-
-    if run_script == "y":
-        # Run the new script.
-        subprocess.run(["python", new_script_name])
-    else:
-        # Output the commands to run the new script.
-        print(f"\nRun the new script with:\n\npython {new_script_name}")
+    run_script(new_script_name)
