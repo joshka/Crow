@@ -21,7 +21,7 @@ from pygments import highlight
 from pygments.lexers import PythonLexer, DiffLexer
 from pygments.formatters import TerminalFormatter
 
-logging.basicConfig(level=logging.INFO, format="%(log_color)s%(levelname)s:%(name)s:%(message)s")
+logging.basicConfig(level=logging.INFO)
 
 def call_openai_api(script_code, instruction):
     response = openai.Edit.create(
@@ -55,38 +55,42 @@ def run_script(script_name):
         # Output the commands to run the new script.
         print(f"\nRun the new script with:\n\npython {script_name}")
 
-script_name = os.path.basename(__file__)
-script_code = open(script_name).read()
+def main():
+    script_name = os.path.basename(__file__)
+    script_code = open(script_name).read()
 
-crow_version = re.search(r"crow-v(\d+)\.py", script_name).group(1)
-instruction = input(f"Crow v{crow_version}: What should I do? ")
+    crow_version = re.search(r"crow-v(\d+)\.py", script_name).group(1)
+    instruction = input(f"Crow v{crow_version}: What should I do? ")
 
-logging.info(f"Running OpenAI API with instruction: {instruction}")
-new_script_code = call_openai_api(script_code, instruction)
-new_script_name = re.sub(r"-v(\d+)\.py", lambda m: f"-v{int(m.group(1)) + 1}.py", script_name)
+    logging.info(f"Running OpenAI API with instruction: {instruction}")
+    new_script_code = call_openai_api(script_code, instruction)
+    new_script_name = re.sub(r"-v(\d+)\.py", lambda m: f"-v{int(m.group(1)) + 1}.py", script_name)
 
-with open(new_script_name, "w") as f:
-    f.write(new_script_code)
+    with open(new_script_name, "w") as f:
+        f.write(new_script_code)
 
-# Output information on how to run the new script.
-logging.info(f"Created new script: {new_script_name}")
+    # Output information on how to run the new script.
+    logging.info(f"Created new script: {new_script_name}")
 
-# Show the diff between the old script and the new script.
-with open(script_name) as f:
-    old_script_code = f.readlines()
+    # Show the diff between the old script and the new script.
+    with open(script_name) as f:
+        old_script_code = f.readlines()
 
-with open(new_script_name) as f:
-    new_script_code = f.readlines()
+    with open(new_script_name) as f:
+        new_script_code = f.readlines()
 
-print(get_diff(old_script_code, new_script_code, script_name, new_script_name))
+    print(get_diff(old_script_code, new_script_code, script_name, new_script_name))
 
-# Check the code for errors.
-subprocess.run(["python", "-m", "py_compile", new_script_name])
+    # Check the code for errors.
+    subprocess.run(["python", "-m", "py_compile", new_script_name])
 
-# Ask the user if they want to commit the new script to git.
-commit_to_git = input("Commit to git? [y/n] ")
+    # Ask the user if they want to commit the new script to git.
+    commit_to_git = input("Commit to git? [y/n] ")
 
-if commit_to_git == "y":
-    add_and_commit_script(new_script_name, instruction)
+    if commit_to_git == "y":
+        add_and_commit_script(new_script_name, instruction)
 
-    run_script(new_script_name)
+        run_script(new_script_name)
+
+if __name__ == "__main__":
+    main()
