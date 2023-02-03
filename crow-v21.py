@@ -33,8 +33,7 @@ response = openai.Edit.create(
         model="code-davinci-edit-001",
         input=script_code,
         instruction=instruction,
-        temperature=0,
-        top_p=0.9)
+        temperature=0)
 new_script_code = response["choices"][0]["text"]
 
 script_version = int(re.search(r"-v(\d+)\.py", script_name).group(1))
@@ -56,6 +55,9 @@ with open(new_script_name) as f:
 
 diff = difflib.unified_diff(old_script_code, new_script_code, fromfile=script_name, tofile=new_script_name)
 print(highlight("".join(diff), DiffLexer(), TerminalFormatter()))
+
+# Check the code for errors.
+subprocess.run(["python", "-m", "py_compile", new_script_name])
 
 # Ask the user if they want to commit the new script to git.
 commit_to_git = input("Commit to git? [y/n] ")
