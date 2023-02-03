@@ -20,7 +20,7 @@ from pygments import highlight
 from pygments.lexers import PythonLexer, DiffLexer
 from pygments.formatters import TerminalFormatter
 
-def commit_script_to_git(script_name, instruction):
+def add_and_commit_script(script_name, instruction):
     # Add the new script to git.
     subprocess.run(["git", "add", script_name])
 
@@ -39,6 +39,7 @@ def commit_script_to_git(script_name, instruction):
         print(f"\nRun the new script with:\n\npython {script_name}")
 
 script_name = os.path.basename(__file__)
+
 script_code = open(script_name).read()
 
 crow_version = re.search(r"crow-v(\d+)\.py", script_name).group(1)
@@ -80,19 +81,4 @@ subprocess.run(["python", "-m", "py_compile", new_script_name])
 commit_to_git = input("Commit to git? [y/n] ")
 
 if commit_to_git == "y":
-    # Add the new script to git.
-    subprocess.run(["git", "add", new_script_name])
-
-    # Commit the new script to git.
-    commit_message = textwrap.fill(f"Generated {new_script_name}\n\n{instruction}", 72)
-    subprocess.run(["git", "commit", "-m", commit_message])
-
-    # Ask the user if they want to run the new script.
-    run_script = input("Run script? [y/n] ")
-
-    if run_script == "y":
-        # Run the new script.
-        subprocess.run(["python", new_script_name])
-    else:
-        # Output the commands to run the new script.
-        print(f"\nRun the new script with:\n\npython {new_script_name}")
+    add_and_commit_script(new_script_name, instruction)
