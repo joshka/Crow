@@ -1,4 +1,5 @@
 import os
+import difflib
 import openai
 
 instruction = input("Enter an instruction: ")
@@ -12,5 +13,12 @@ response = openai.Edit.create(
         temperature=0)
 
 new_script_code = response["choices"][0]["text"]
+
+diff = difflib.unified_diff(script_code.splitlines(keepends=True),
+                            new_script_code.splitlines(keepends=True),
+                            fromfile=script_name,
+                            tofile=script_name)
+print("".join(diff))
+
 with open(script_name, "w") as f:
     f.write(new_script_code)
