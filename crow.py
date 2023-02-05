@@ -1,6 +1,10 @@
 import os
 import difflib
 import openai
+import subprocess
+from pygments import highlight
+from pygments.lexers import DiffLexer
+from pygments.formatters import TerminalFormatter
 
 instruction = input("Enter an instruction: ")
 
@@ -18,8 +22,9 @@ diff = difflib.unified_diff(script_code.splitlines(keepends=True),
                             new_script_code.splitlines(keepends=True),
                             fromfile=script_name,
                             tofile=script_name)
-print("".join(diff))
+print(highlight("".join(diff), DiffLexer(), TerminalFormatter()))
 
 if input("Save changes? [y/N] ").lower() == "y":
     with open(script_name, "w") as f:
         f.write(new_script_code)
+    subprocess.run(["git", "commit", "-am", instruction])
