@@ -20,5 +20,6 @@ diff = difflib.unified_diff(script_code.splitlines(keepends=True),
                             tofile=script_name)
 print("".join(diff))
 
-with open(script_name, "w") as f:
-    f.write(new_script_code)
+if input("Save changes? [y/N] ").lower() == "y":
+    with open(script_name, "w") as f:
+        f.write(new_script_code)
