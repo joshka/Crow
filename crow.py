@@ -42,6 +42,9 @@ def main():
             with open(script_name, "w") as f:
                 f.write(new_script_code)
             subprocess.run(["git", "commit", "-am", instruction])
+
+            if input("Run new version? [y/N] ").lower() == "y":
+                subprocess.run(["python3", script_name])
             break
 
 if __name__ == "__main__":
