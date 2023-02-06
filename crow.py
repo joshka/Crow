@@ -6,6 +6,8 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
+VERSION = "2.0.0"
+
 def edit(script_code, instruction):
     response = openai.Edit.create(
             model="code-davinci-edit-001",
