@@ -20,7 +20,6 @@ def edit(script_code, instruction):
 
     new_script_code = response["choices"][0]["text"]
     logging.info("Got response from openai")
-    logging.info("Response: %s", {k: v for k, v in response.items() if k != "text"})
 
     return new_script_code
 
