@@ -2,13 +2,16 @@ import os
 import difflib
 import openai
 import subprocess
+import logging
 from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
 VERSION = "2.0.0"
+logging.basicConfig(level=logging.INFO)
 
 def edit(script_code, instruction):
+    logging.info("Calling openai")
     response = openai.Edit.create(
             model="code-davinci-edit-001",
             input=script_code,
@@ -16,6 +19,8 @@ def edit(script_code, instruction):
             temperature=0)
 
     new_script_code = response["choices"][0]["text"]
+    logging.info("Got response from openai")
+    logging.info("Response: %s", response)
 
     return new_script_code
 
