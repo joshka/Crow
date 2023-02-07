@@ -11,7 +11,7 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.24"
+VERSION = "1.0.25"
 logging.basicConfig(level=logging.INFO)
 
 unsaved_instructions = []
@@ -38,7 +38,7 @@ def edit(script_code, preprocessed_instruction):
             model="code-davinci-edit-001",
             input=script_code,
             instruction=preprocessed_instruction,
-            temperature=0)
+            temperature=0.9)
 
     new_script_code = response["choices"][0]["text"]
     logging.info("Got response from openai")
