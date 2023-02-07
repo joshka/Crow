@@ -8,7 +8,7 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.0"
+VERSION = "1.0.2"
 logging.basicConfig(level=logging.INFO)
 
 def increment_version(script_code):
@@ -37,7 +37,7 @@ def main():
     script_code = open(script_name).read()
 
     while True:
-        instruction = input("Enter an instruction: ")
+        instruction = input(f"Enter an instruction (v{VERSION}): ")
         new_script_code = edit(increment_version(script_code), instruction)
 
         diff = difflib.unified_diff(script_code.splitlines(keepends=True),
