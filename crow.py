@@ -11,7 +11,7 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.23"
+VERSION = "1.0.24"
 logging.basicConfig(level=logging.INFO)
 
 unsaved_instructions = []
@@ -71,29 +71,37 @@ def main():
                 print()
             continue
 
-        new_script_code = edit(increment_version(script_code), preprocess_instruction(instruction))
-        ensure_no_syntax_errors(new_script_code)
+        new_script_code = edit(
+                increment_version(script_code),
+                preprocess_instruction(instruction))
 
-        diff = difflib.unified_diff(script_code.splitlines(keepends=True),
-                                    new_script_code.splitlines(keepends=True),
-                                    fromfile=script_name,
-                                    tofile=script_name)
-        print(highlight("".join(diff), DiffLexer(), TerminalFormatter()))
+        ensure_no_syntax_errors(new_script_code) # TODO: catch and handle this
 
-        save_changes = input("Save changes? [y/N/q] ").lower()
-        if save_changes == "q":
-            break
-        elif save_changes == "y":
-            with open(script_name, "w") as f:
-                f.write(new_script_code)
-            subprocess.run(["git", "add", script_name])
-            subprocess.run(["git", "commit", "-m", instruction.split(".")[0], "-m", textwrap.fill(instruction, 72)])
+        print_diff(script_code, new_script_code, script_name)
 
-            if input("Run new version? [y/N] ").lower() == "y":
-                subprocess.run(["python3", script_name])
-            break
-        else:
-            unsaved_instructions.append(instruction)
+        save_changes = prompt_save_changes()
+        if save_changes == "q": break
+        elif save_changes == "y": save_changes_and_run(script_name, new_script_code, instruction)
+        else: unsaved_instructions.append(instruction)
+
+def print_diff(script_code, new_script_code, script_name):
+    diff = difflib.unified_diff(script_code.splitlines(keepends=True),
+                                new_script_code.splitlines(keepends=True),
+                                fromfile=script_name,
+                                tofile=script_name)
+    print(highlight("".join(diff), DiffLexer(), TerminalFormatter()))
+
+def prompt_save_changes():
+    return input("Save changes? [y/N/q] ").lower()
+
+def save_changes_and_run(script_name, new_script_code, instruction):
+    with open(script_name, "w") as f:
+        f.write(new_script_code)
+    subprocess.run(["git", "add", script_name])
+    subprocess.run(["git", "commit", "-m", instruction.split(".")[0], "-m", textwrap.fill(instruction, 72)])
+
+    if input("Run new version? [y/N] ").lower() == "y":
+        subprocess.run(["python3", script_name])
 
 if __name__ == "__main__":
     try:
