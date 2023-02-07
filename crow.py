@@ -8,7 +8,7 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.2"
+VERSION = "1.0.3"
 logging.basicConfig(level=logging.INFO)
 
 def increment_version(script_code):
@@ -30,8 +30,7 @@ def edit(script_code, instruction):
 
     return new_script_code
 
-    script_code = open(script_name).read()
-
+    
 def main():
     script_name = os.path.basename(__file__)
     script_code = open(script_name).read()
