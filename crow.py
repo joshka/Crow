@@ -11,8 +11,41 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.28"
+VERSION = "1.0.30"
 logging.basicConfig(level=logging.INFO)
+
+"""
+Instructions are useful for humans. Even if we forget
+a single line of code, we can just look at the instructions
+to figure out what to do. And that's exactly how this file
+works!
+
+Every time you run this file, you are asked to enter an
+instruction. I call it this way because each instruction starts
+with a verb. You could also call it a `command` or `task` or whatever
+you like.
+
+For example, `fix bugs`, `add logging`, `fix syntax errors`,
+`add function definitions`, `fix indentation`, `add doc strings`.
+
+Just enter a simple english instruction of what you want to do
+with this file, and hit enter. The file will be edited to satisfy
+that instruction on the fly. If you're happy with these changes,
+you can save them by pressing 'y'. If not, press 'n' and the changes
+will be discarded.
+
+Then, you can run the new version of the file by pressing 'y' in
+the prompt that follows.
+
+That's it!
+
+All the boilerplate you add in this file will be added automatically
+by the model.
+
+The model can add any python boilerplate to the file, such as function
+definitions, classes, loops, conditionals, doc strings, syntax errors
+etc. It can even fix such syntax errors.
+"""
 
 unsaved_instructions = []
 
