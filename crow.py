@@ -11,21 +11,30 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.25"
+VERSION = "1.0.26"
 logging.basicConfig(level=logging.INFO)
 
 unsaved_instructions = []
 
 def increment_version(script_code):
+    """Increases the version number in this script.
+    """
     version_match = re.search(r"VERSION = \"(\d+)\.(\d+)\.(\d+)\"", script_code)
     major, minor, patch = version_match.groups()
     new_version = f"{major}.{minor}.{int(patch) + 1}"
     return re.sub(r"VERSION = \"(\d+)\.(\d+)\.(\d+)\"", f"VERSION = \"{new_version}\"", script_code)
 
 def preprocess_instruction(instruction):
+    """Preprocess the instruction before passing it to OpenAI model.
+    """
     return instruction.replace("\n", " ")
 
 def ensure_no_syntax_errors(script_code):
+    """Check for syntax errors.
+
+    Raises:
+        SyntaxError
+    """
     try:
         ast.parse(script_code)
     except SyntaxError as e:
@@ -33,12 +42,15 @@ def ensure_no_syntax_errors(script_code):
     return True
 
 def edit(script_code, preprocessed_instruction):
+    """Ask the OpenAI model for suggestions to edit the
+    script code so that it satisfies the given instruction.
+    """
     logging.info("Calling openai")
-    response = openai.Edit.create(
-            model="code-davinci-edit-001",
-            input=script_code,
-            instruction=preprocessed_instruction,
-            temperature=0.9)
+    response = openai.Edit.create(  # TODO: check for any error from OpenAI
+        model="code-davinci-edit-001",
+        input=script_code,
+        instruction=preprocessed_instruction,
+        temperature=0.9)
 
     new_script_code = response["choices"][0]["text"]
     logging.info("Got response from openai")
@@ -84,6 +96,9 @@ def main():
         elif save_changes == "y": save_changes_and_run(script_name, new_script_code, instruction)
         else: unsaved_instructions.append(instruction)
 
+    """Prints a coloured diff of the script code
+    before and after editing.
+    """
 def print_diff(script_code, new_script_code, script_name):
     diff = difflib.unified_diff(script_code.splitlines(keepends=True),
                                 new_script_code.splitlines(keepends=True),
