@@ -8,7 +8,7 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.10"
+VERSION = "1.0.12"
 logging.basicConfig(level=logging.INFO)
 
 def increment_version(script_code):
@@ -59,4 +59,9 @@ def main():
             break
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(e)
+        if input("Rollback? [y/N] ").lower() == "y":
+            subprocess.run(["git", "reset", "--hard", "HEAD~1"])
