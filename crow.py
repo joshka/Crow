@@ -11,7 +11,8 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.31"
+# TODO: add dragons
+VERSION = "1.0.33"
 logging.basicConfig(level=logging.INFO)
 
 """
@@ -47,7 +48,10 @@ definitions, classes, loops, conditionals, doc strings, syntax errors
 etc. It can even fix such syntax errors.
 """
 
-unsaved_instructions = []
+unsaved_instructions = [
+    #"play music",
+    #"give me a recipe for banana bread"
+    ]
 
 def increment_version(script_code):
     """Increases the version number in this script.
