@@ -8,7 +8,7 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.8"
+VERSION = "1.0.9"
 logging.basicConfig(level=logging.INFO)
 
 def increment_version(script_code):
@@ -45,9 +45,10 @@ def main():
                                     tofile=script_name)
         print(highlight("".join(diff), DiffLexer(), TerminalFormatter()))
 
-        if input("Save changes? [y/N/q] ").lower() == "q":
+        save_changes = input("Save changes? [y/N/q] ").lower()
+        if save_changes == "q":
             break
-        elif input("Save changes? [y/N/q] ").lower() == "y":
+        elif save_changes == "y":
             with open(script_name, "w") as f:
                 f.write(new_script_code)
             subprocess.run(["git", "commit", "-am", instruction])
