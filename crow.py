@@ -9,8 +9,10 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.17"
+VERSION = "1.0.18"
 logging.basicConfig(level=logging.INFO)
+
+unsaved_instructions = []
 
 def increment_version(script_code):
     version_match = re.search(r"VERSION = \"(\d+)\.(\d+)\.(\d+)\"", script_code)
@@ -40,7 +42,15 @@ def main():
     script_code = open(script_name).read()
 
     while True:
-        instruction = input(f"Enter an instruction (v{VERSION}): ")
+        instruction = input(f"Enter an instruction (v{VERSION}): ").strip()
+        if not instruction:
+            if unsaved_instructions:
+                print("Unsaved instructions:")
+                for i, instruction in enumerate(unsaved_instructions):
+                    print(f"{i + 1}. {instruction}")
+                print()
+            continue
+
         new_script_code = edit(increment_version(script_code), preprocess_instruction(instruction))
 
         diff = difflib.unified_diff(script_code.splitlines(keepends=True),
@@ -61,6 +71,8 @@ def main():
             if input("Run new version? [y/N] ").lower() == "y":
                 subprocess.run(["python3", script_name])
             break
+        else:
+            unsaved_instructions.append(instruction)
 
 if __name__ == "__main__":
     try:
