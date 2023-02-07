@@ -11,7 +11,7 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.22"
+VERSION = "1.0.23"
 logging.basicConfig(level=logging.INFO)
 
 unsaved_instructions = []
@@ -29,8 +29,7 @@ def ensure_no_syntax_errors(script_code):
     try:
         ast.parse(script_code)
     except SyntaxError as e:
-        logging.info("Syntax error")
-        return False
+        raise e
     return True
 
 def edit(script_code, preprocessed_instruction):
@@ -72,10 +71,8 @@ def main():
                 print()
             continue
 
-        while True:
-            new_script_code = edit(increment_version(script_code), preprocess_instruction(instruction))
-            if ensure_no_syntax_errors(new_script_code):
-                break
+        new_script_code = edit(increment_version(script_code), preprocess_instruction(instruction))
+        ensure_no_syntax_errors(new_script_code)
 
         diff = difflib.unified_diff(script_code.splitlines(keepends=True),
                                     new_script_code.splitlines(keepends=True),
