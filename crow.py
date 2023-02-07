@@ -12,7 +12,7 @@ from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
 VERSION = "1.0.27"
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 unsaved_instructions = []
 
@@ -55,6 +55,9 @@ def edit(script_code, preprocessed_instruction):
     new_script_code = response["choices"][0]["text"]
     logging.info("Got response from openai")
 
+
+    if new_script_code == script_code:
+        raise Exception("Model did not change the script code")
     return new_script_code
 
     
@@ -122,6 +125,6 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        logging.error(e)
+        print(e)
         if input("Rollback? [y/N] ").lower() == "y":
             subprocess.run(["git", "reset", "--hard", "HEAD~1"])
