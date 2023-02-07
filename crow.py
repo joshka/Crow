@@ -3,12 +3,19 @@ import difflib
 import openai
 import subprocess
 import logging
+import re
 from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "2.0.0"
+VERSION = "1.0.0"
 logging.basicConfig(level=logging.INFO)
+
+def increment_version(script_code):
+    version_match = re.search(r"VERSION = \"(\d+)\.(\d+)\.(\d+)\"", script_code)
+    major, minor, patch = version_match.groups()
+    new_version = f"{major}.{minor}.{int(patch) + 1}"
+    return re.sub(r"VERSION = \"(\d+)\.(\d+)\.(\d+)\"", f"VERSION = \"{new_version}\"", script_code)
 
 def edit(script_code, instruction):
     logging.info("Calling openai")
@@ -23,13 +30,15 @@ def edit(script_code, instruction):
 
     return new_script_code
 
+    script_code = open(script_name).read()
+
 def main():
     script_name = os.path.basename(__file__)
     script_code = open(script_name).read()
 
     while True:
         instruction = input("Enter an instruction: ")
-        new_script_code = edit(script_code, instruction)
+        new_script_code = edit(increment_version(script_code), instruction)
 
         diff = difflib.unified_diff(script_code.splitlines(keepends=True),
                                     new_script_code.splitlines(keepends=True),
