@@ -11,7 +11,7 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.27"
+VERSION = "1.0.28"
 logging.basicConfig(level=logging.INFO)
 
 unsaved_instructions = []
@@ -116,7 +116,7 @@ def save_changes_and_run(script_name, new_script_code, instruction):
     with open(script_name, "w") as f:
         f.write(new_script_code)
     subprocess.run(["git", "add", script_name])
-    subprocess.run(["git", "commit", "-m", instruction.split(".")[0], "-m", textwrap.fill(instruction, 72)])
+    subprocess.run(["git", "commit", "-m", instruction.split(".")[0], "-m", textwrap.fill(" ".join(instruction.split(".")[1:]), 72)])
 
     if input("Run new version? [y/N] ").lower() == "y":
         subprocess.run(["python3", script_name])
