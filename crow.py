@@ -6,11 +6,12 @@ import logging
 import re
 import textwrap
 import readline
+import ast
 from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.20"
+VERSION = "1.0.22"
 logging.basicConfig(level=logging.INFO)
 
 unsaved_instructions = []
@@ -23,6 +24,14 @@ def increment_version(script_code):
 
 def preprocess_instruction(instruction):
     return instruction.replace("\n", " ")
+
+def ensure_no_syntax_errors(script_code):
+    try:
+        ast.parse(script_code)
+    except SyntaxError as e:
+        logging.info("Syntax error")
+        return False
+    return True
 
 def edit(script_code, preprocessed_instruction):
     logging.info("Calling openai")
@@ -63,7 +72,10 @@ def main():
                 print()
             continue
 
-        new_script_code = edit(increment_version(script_code), preprocess_instruction(instruction))
+        while True:
+            new_script_code = edit(increment_version(script_code), preprocess_instruction(instruction))
+            if ensure_no_syntax_errors(new_script_code):
+                break
 
         diff = difflib.unified_diff(script_code.splitlines(keepends=True),
                                     new_script_code.splitlines(keepends=True),
