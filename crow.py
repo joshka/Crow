@@ -8,7 +8,7 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.9"
+VERSION = "1.0.10"
 logging.basicConfig(level=logging.INFO)
 
 def increment_version(script_code):
@@ -51,7 +51,8 @@ def main():
         elif save_changes == "y":
             with open(script_name, "w") as f:
                 f.write(new_script_code)
-            subprocess.run(["git", "commit", "-am", instruction])
+            subprocess.run(["git", "add", script_name])
+            subprocess.run(["git", "commit", "-m", instruction])
 
             if input("Run new version? [y/N] ").lower() == "y":
                 subprocess.run(["python3", script_name])
