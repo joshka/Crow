@@ -9,7 +9,7 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.16"
+VERSION = "1.0.17"
 logging.basicConfig(level=logging.INFO)
 
 def increment_version(script_code):
@@ -21,12 +21,12 @@ def increment_version(script_code):
 def preprocess_instruction(instruction):
     return instruction.replace("\n", " ")
 
-def edit(script_code, instruction):
+def edit(script_code, preprocessed_instruction):
     logging.info("Calling openai")
     response = openai.Edit.create(
             model="code-davinci-edit-001",
             input=script_code,
-            instruction=preprocess_instruction(instruction),
+            instruction=preprocessed_instruction,
             temperature=0)
 
     new_script_code = response["choices"][0]["text"]
@@ -41,7 +41,7 @@ def main():
 
     while True:
         instruction = input(f"Enter an instruction (v{VERSION}): ")
-        new_script_code = edit(increment_version(script_code), instruction)
+        new_script_code = edit(increment_version(script_code), preprocess_instruction(instruction))
 
         diff = difflib.unified_diff(script_code.splitlines(keepends=True),
                                     new_script_code.splitlines(keepends=True),
