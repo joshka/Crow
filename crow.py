@@ -11,8 +11,8 @@ from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.26"
-logging.basicConfig(level=logging.INFO)
+VERSION = "1.0.27"
+logging.basicConfig(level=logging.DEBUG)
 
 unsaved_instructions = []
 
@@ -122,6 +122,6 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        print(e)
+        logging.error(e)
         if input("Rollback? [y/N] ").lower() == "y":
             subprocess.run(["git", "reset", "--hard", "HEAD~1"])
