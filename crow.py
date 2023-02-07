@@ -5,11 +5,12 @@ import subprocess
 import logging
 import re
 import textwrap
+import readline
 from pygments import highlight
 from pygments.lexers import DiffLexer
 from pygments.formatters import TerminalFormatter
 
-VERSION = "1.0.18"
+VERSION = "1.0.20"
 logging.basicConfig(level=logging.INFO)
 
 unsaved_instructions = []
@@ -39,6 +40,17 @@ def edit(script_code, preprocessed_instruction):
     
 def main():
     script_name = os.path.basename(__file__)
+
+    def complete(text, state):
+        for i, instruction in enumerate(unsaved_instructions):
+            if instruction.startswith(text):
+                if not state:
+                    return instruction
+                state -= 1
+
+    readline.set_completer(complete)
+    readline.parse_and_bind("tab: complete")
+
     script_code = open(script_name).read()
 
     while True:
